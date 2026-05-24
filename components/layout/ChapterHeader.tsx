@@ -46,7 +46,7 @@ export default function ChapterHeader({
       <h1 className="hx-serif text-[64px] leading-[1.02] tracking-tight text-neutral-100">
         {title}
         {italic && (
-          <span className="hx-script text-[52px] hx-amber ml-4" style={{ fontSize: '52px' }}>
+          <span className="hx-script text-[52px] hx-amber ml-4" style={{ fontSize: '52px', fontFamily: "'Great Vibes', cursive" }}>
             {italic}
           </span>
         )}
