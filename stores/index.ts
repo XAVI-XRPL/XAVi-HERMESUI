@@ -46,8 +46,8 @@ interface StudioState {
 // ── Defaults ────────────────────────────────────────────────────────────────
 
 const DEFAULT_SETTINGS: Settings = {
-  mode: 'shared',
-  activeProfileId: null,
+  mode: 'profile',
+  activeProfileId: DEFAULT_PROFILES[0]?.id ?? null,
   activeShared: 'mission',
   profileTabs: {},
   activeSessionId: {},

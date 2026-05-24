@@ -34,19 +34,19 @@ export default function ChapterHeader({
           {numeral}.
         </span>
         <span
-          className="w-8 h-px"
-          style={{ background: 'rgba(255,255,255,.18)' }}
+          className="flex-1 h-px"
+          style={{ background: 'linear-gradient(90deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.04) 100%)' }}
         />
         <span className="hx-mono text-[10px] uppercase tracking-[0.22em] text-neutral-500">
           {kicker}
         </span>
       </div>
 
-      {/* Title + italic accent */}
-      <h1 className="hx-serif text-[58px] leading-[1.02] tracking-tight text-neutral-100">
+      {/* Title + script accent */}
+      <h1 className="hx-serif text-[64px] leading-[1.02] tracking-tight text-neutral-100">
         {title}
         {italic && (
-          <span className="italic hx-amber-dim ml-3">
+          <span className="hx-script text-[52px] hx-amber ml-4" style={{ fontSize: '52px' }}>
             {italic}
           </span>
         )}
