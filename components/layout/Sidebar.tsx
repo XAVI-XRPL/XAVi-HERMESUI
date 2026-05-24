@@ -31,12 +31,17 @@ const I = {
   plus: <Icon d={<><path d="M12 5v14" /><path d="M5 12h14" /></>} />,
 };
 
-// Shared surfaces shown in sidebar (matching mockup)
+// Shared surfaces shown in sidebar (matching mockup - ALL 9)
 const SIDEBAR_SHARED: Array<{ id: SharedSurfaceId; label: string; numeral: string; icon: React.ReactNode }> = [
   { id: 'mission',  label: 'MISSION CONTROL', icon: I.compass, numeral: 'I'   },
   { id: 'memory',   label: 'MEMORY',          icon: I.book,    numeral: 'V'   },
   { id: 'kanban',   label: 'KANBAN',          icon: I.kanban,  numeral: 'VI'  },
   { id: 'journal',  label: 'JOURNAL',         icon: I.edit,    numeral: 'VII' },
+  { id: 'goals',    label: 'GOALS',           icon: I.target,  numeral: 'VIII'},
+  { id: 'studio',   label: 'STUDIO',          icon: I.map,     numeral: 'IX'  },
+  { id: 'skills',   label: 'SKILLS',          icon: I.wrench,  numeral: 'X'   },
+  { id: 'settings', label: 'SETTINGS',        icon: I.cog,     numeral: 'XI'  },
+  { id: 'claw3d',   label: 'CLAW3D · OFFICE', icon: I.cube,    numeral: 'XII' },
 ];
 
 // ── Status Dot ───────────────────────────────────────────────────────────────
