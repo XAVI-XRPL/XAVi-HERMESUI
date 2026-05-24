@@ -1,0 +1,376 @@
+@tailwind base, components, utilities;
+
+/* ── Google Fonts ─────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:wght@300;400;500;600;700&display=swap');
+
+/* ── CSS Variables ─────────────────────────────────────────────────────── */
+:root {
+  --accent: #c9a76c;
+  --accent-rgb: 201, 167, 108;
+  --bg: #0A0A0E;
+  --brass: #c9a76c;
+  --brass-dim: #8c7449;
+  --text-primary: #e8e8e3;
+  --text-secondary: #d4d4cc;
+  --text-muted: #9a9a92;
+  --text-dim: #5a5a52;
+
+  /* Tailwind v4 — map prototype tokens */
+  --color-bg: #0A0A0E;
+  --color-brass: #c9a76c;
+  --color-brass-dim: #8c7449;
+}
+
+/* ── Base Reset ─────────────────────────────────────────────────────────── */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ── Typography ─────────────────────────────────────────────────────────── */
+.hx-serif {
+  font-family: 'Instrument Serif', Georgia, serif;
+  letter-spacing: -0.012em;
+}
+
+.hx-mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Ambient Effects ─────────────────────────────────────────────────────── */
+.hx-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.hx-ambient {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 320px;
+  pointer-events: none;
+  background: radial-gradient(ellipse 75% 100% at 50% 0%, rgba(var(--accent-rgb), 0.18) 0%, rgba(var(--accent-rgb), 0.05) 25%, transparent 60%);
+  transition: background 0.6s ease;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────── */
+.hx-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.hx-scroll::-webkit-scrollbar-track { background: transparent; }
+.hx-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 3px; }
+.hx-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.14); }
+
+/* ── Motion Keyframes ───────────────────────────────────────────────────── */
+@keyframes hx-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes hx-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+@keyframes hx-breathe {
+  0%, 100% { opacity: 0.65; transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(1.08); }
+}
+
+@keyframes hx-bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+
+@keyframes hx-slidein {
+  from { transform: translateX(40px); opacity: 0; }
+  to   { transform: none;          opacity: 1; }
+}
+
+.hx-fade-up  { animation: hx-fade-up  0.55s cubic-bezier(.2,.7,.2,1) forwards; }
+.hx-pulse    { animation: hx-pulse    1.4s  ease-in-out infinite; }
+.hx-breathe  { animation: hx-breathe  2.6s  ease-in-out infinite; }
+.hx-bob      { animation: hx-bob      3.4s  ease-in-out infinite; }
+.hx-slidein  { animation: hx-slidein  0.4s  cubic-bezier(.2,.7,.2,1) forwards; }
+
+/* Blinking streaming caret */
+.hx-caret {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  vertical-align: -3px;
+  margin-left: 3px;
+  background: currentColor;
+  border-radius: 1px;
+  animation: hx-pulse 0.95s ease-in-out infinite;
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* ── Skeuomorphic Orb ───────────────────────────────────────────────────── */
+.hx-orb {
+  position: relative;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,.95) 0%, rgba(255,255,255,.55) 6%, rgba(255,255,255,.15) 14%, transparent 28%),
+    radial-gradient(circle at 70% 78%, rgba(0,0,0,.45) 0%, rgba(0,0,0,.15) 25%, transparent 55%),
+    radial-gradient(circle at 50% 50%, var(--accent) 0%, rgba(var(--accent-rgb),.85) 55%, rgba(var(--accent-rgb),.4) 90%);
+  box-shadow:
+    0 4px 14px rgba(var(--accent-rgb), .35),
+    0 0 22px rgba(var(--accent-rgb), .25),
+    inset 0 -2px 4px rgba(0,0,0,.35),
+    inset 0 1px 1px rgba(255,255,255,.15);
+}
+
+.hx-orb::after {
+  content: '';
+  position: absolute;
+  left: 22%;
+  top: 18%;
+  width: 18%;
+  height: 12%;
+  background: rgba(255,255,255,.7);
+  border-radius: 50%;
+  filter: blur(1.5px);
+  transform: rotate(-18deg);
+}
+
+.hx-glow-on-hover {
+  transition: filter .3s ease, transform .3s ease;
+}
+.hx-glow-on-hover:hover {
+  filter: brightness(1.1) saturate(1.1);
+}
+
+/* ── Glass Surface ─────────────────────────────────────────────────────── */
+.hx-glass {
+  background:
+    linear-gradient(140deg,
+      rgba(255,255,255,.045) 0%,
+      rgba(255,255,255,.015) 100%);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid rgba(255,255,255,.06);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 8px 32px rgba(0,0,0,.32),
+    0 1px 2px rgba(0,0,0,.4);
+}
+
+.hx-glass-elevated {
+  background:
+    linear-gradient(140deg,
+      rgba(255,255,255,.08) 0%,
+      rgba(255,255,255,.025) 100%);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255,255,255,.09);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.1) inset,
+    0 12px 48px rgba(0,0,0,.5),
+    0 2px 4px rgba(0,0,0,.4);
+}
+
+/* ── Skeleton Pill Button ───────────────────────────────────────────────── */
+.hx-pill {
+  position: relative;
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,.06) 0%,
+      rgba(255,255,255,.01) 100%);
+  border: 1px solid rgba(255,255,255,.08);
+  border-top-color: rgba(255,255,255,.14);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.05) inset,
+    0 1px 2px rgba(0,0,0,.3);
+  transition: all .18s ease;
+}
+
+.hx-pill:hover {
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,.09) 0%,
+      rgba(255,255,255,.025) 100%);
+  border-top-color: rgba(255,255,255,.18);
+}
+
+.hx-pill:active {
+  transform: translateY(.5px);
+}
+
+.hx-pill-active {
+  background:
+    linear-gradient(180deg,
+      rgba(var(--accent-rgb),.22) 0%,
+      rgba(var(--accent-rgb),.06) 100%) !important;
+  border: 1px solid rgba(var(--accent-rgb),.4) !important;
+  border-top-color: rgba(var(--accent-rgb),.55) !important;
+  box-shadow:
+    0 1px 0 rgba(var(--accent-rgb),.3) inset,
+    0 0 16px rgba(var(--accent-rgb),.25),
+    0 1px 2px rgba(0,0,0,.3) !important;
+  color: var(--accent) !important;
+}
+
+/* ── Skeleton Switch / Toggle ─────────────────────────────────────────── */
+.hx-switch {
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  background:
+    linear-gradient(180deg,
+      rgba(0,0,0,.4) 0%,
+      rgba(0,0,0,.2) 100%);
+  border: 1px solid rgba(255,255,255,.06);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.5);
+  transition: all .22s ease;
+}
+
+.hx-switch.on {
+  background:
+    linear-gradient(180deg,
+      rgba(var(--accent-rgb),.55) 0%,
+      rgba(var(--accent-rgb),.35) 100%);
+  border-color: rgba(var(--accent-rgb),.5);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.3),
+              0 0 12px rgba(var(--accent-rgb),.3);
+}
+
+.hx-switch-knob {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 30%, #fff, #c4c4bf 80%);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,.5),
+    inset 0 -1px 1px rgba(0,0,0,.15);
+  transition: transform .22s cubic-bezier(.5,0,.3,1.4);
+}
+
+.hx-switch.on .hx-switch-knob {
+  transform: translateX(16px);
+}
+
+/* ── Misc Utilities ─────────────────────────────────────────────────────── */
+.hx-hairline {
+  border-color: rgba(255,255,255,.07) !important;
+}
+
+.hx-amber     { color: var(--brass); }
+.hx-amber-dim { color: var(--brass-dim); }
+
+.hx-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  padding: 0 4px;
+  height: 18px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  background:
+    linear-gradient(180deg,
+      rgba(255,255,255,.08),
+      rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 1px 1px rgba(0,0,0,.3);
+  color: var(--brass);
+}
+
+.hx-floor {
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* Input base reset */
+input,
+textarea,
+select {
+  outline: none;
+}
+
+select {
+  background: rgba(0,0,0,.4);
+  color: var(--text-primary);
+}
+
+select option {
+  background: #1a1a1e;
+  color: var(--text-primary);
+}
+
+/* Drawer overlays */
+.hx-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(8px);
+  z-index: 60;
+}
+
+.hx-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 520px;
+  max-width: 95vw;
+  z-index: 70;
+}
+
+/* Form inputs — match prototype hx-input */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  background: rgba(0,0,0,.3);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-size: 13px;
+  transition: border-color .18s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+  border-color: rgba(255,255,255,.18);
+}
+
+/* ── Reduced Motion ─────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .hx-fade-up,
+  .hx-pulse,
+  .hx-breathe,
+  .hx-bob,
+  .hx-slidein,
+  .hx-caret {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
