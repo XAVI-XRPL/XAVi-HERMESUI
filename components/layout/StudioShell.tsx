@@ -36,7 +36,7 @@ interface StudioShellProps {
   day: string;
 }
 
-// ── Profile Tab Pills ────────────────────────────────────────────────────────
+// ── Profile Tab Pills (exact match to prototype) ──────────────────────────
 
 function ProfileTabPills({ profile, activeTab, onTabChange, onEditProfile }: {
   profile: Profile;
@@ -45,50 +45,34 @@ function ProfileTabPills({ profile, activeTab, onTabChange, onEditProfile }: {
   onEditProfile: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between px-10 mt-6 mb-0">
-      <div className="flex items-center gap-2">
-        {PROFILE_TABS.map((tab) => {
-          const isActive = activeTab === tab.id;
+    <div className="px-10 mb-8">
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {PROFILE_TABS.map((t) => {
+          const active = t.id === activeTab;
           return (
             <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id as ProfileTabId)}
-              className="hx-pill rounded-full px-4 py-2 text-[12px] font-medium transition-all duration-200"
-              style={{
-                fontFamily: "'Inter Tight', sans-serif",
-                color: isActive ? profile.accent : '#7a7a72',
-                ...(isActive ? {
-                  background: `linear-gradient(180deg, rgba(${profile.accentRGB},.2) 0%, rgba(${profile.accentRGB},.06) 100%)`,
-                  border: `1px solid rgba(${profile.accentRGB},.4)`,
-                  borderTopColor: `rgba(${profile.accentRGB},.55)`,
-                  boxShadow: `0 1px 0 rgba(${profile.accentRGB},.3) inset, 0 0 16px rgba(${profile.accentRGB},.2), 0 1px 2px rgba(0,0,0,.3)`,
-                } : {}),
-              }}
+              key={t.id}
+              onClick={() => onTabChange(t.id as ProfileTabId)}
+              className={`hx-pill px-4 py-1.5 rounded-full flex items-center gap-2 text-[12px] ${active ? 'hx-pill-active' : 'text-neutral-400'}`}
+              style={active ? { '--accent': profile.accent, '--accent-rgb': profile.accentRGB } as React.CSSProperties : {}}
             >
-              <span className="hx-mono" style={{ fontSize: '10px', opacity: 0.6 }}>{tab.numeral} </span>
-              {tab.label}
+              <span className="hx-mono text-[9px] opacity-60">{t.numeral}</span>
+              {t.label}
             </button>
           );
         })}
+        <div className="flex-1" />
+        <button
+          onClick={onEditProfile}
+          className="hx-pill px-3 py-1.5 rounded-full text-[11px] text-neutral-400 flex items-center gap-1.5"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z" />
+          </svg>
+          Edit profile
+        </button>
       </div>
-
-      {/* Edit profile button */}
-      <button
-        onClick={onEditProfile}
-        className="flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] transition-all duration-200 hover:bg-white/[0.05]"
-        style={{
-          background: 'rgba(255,255,255,.04)',
-          border: '1px solid rgba(255,255,255,.07)',
-          color: '#7a7a72',
-          fontFamily: "'Inter Tight', sans-serif",
-        }}
-      >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
-          <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"
-                fill="currentColor" stroke="none" opacity=".7" />
-        </svg>
-        Edit profile
-      </button>
     </div>
   );
 }
@@ -101,7 +85,7 @@ export default function StudioShell({ time, day }: StudioShellProps) {
   const setActiveProfileTab = useStudioStore((s) => s.setActiveProfileTab);
 
   // ── Local overlay state
-  const [paletteOpen, setPaletteOpen]     = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<null | 'new' | Profile>(null);
 
   // ── Keyboard shortcuts
@@ -119,6 +103,11 @@ export default function StudioShell({ time, day }: StudioShellProps) {
     ? profiles.find((p) => p.id === settings.activeProfileId)
     : null;
 
+  // ── Dynamic ambient accent ────────────────────────────────────────────
+  const ambientAccent = settings.mode === 'profile' && activeProfile
+    ? { accent: activeProfile.accent, rgb: activeProfile.accentRGB }
+    : { accent: '#c9a76c', rgb: '201,167,108' };
+
   // ── Render shared surfaces ──────────────────────────────────────────────
   function renderSharedSurface() {
     const { activeShared } = settings;
@@ -126,9 +115,9 @@ export default function StudioShell({ time, day }: StudioShellProps) {
     if (activeShared === 'mission') {
       return (
         <>
-          <ChapterHeader numeral="I" kicker="SELF · SHARED"
-            title="Mission Control" italic="the cockpit"
-            subtitle="Live telemetry, active sessions, and system status at a glance."
+          <ChapterHeader numeral="I" kicker="MISSION CONTROL · THE BRIDGE"
+            title="Bridge" italic="today"
+            subtitle="The view from above. Every agent, every thread, every signal — at a glance."
             day={day} time={time}
           />
           <MissionControl />
@@ -150,9 +139,9 @@ export default function StudioShell({ time, day }: StudioShellProps) {
     if (activeShared === 'studio') {
       return (
         <>
-          <ChapterHeader numeral="IX" kicker="SELF · SHARED"
+          <ChapterHeader numeral="IX" kicker="SELF · STUDIO"
             title="Studio" italic="the workshop"
-            subtitle="Live GPU/RAM/VRAM telemetry — models, compute, substrate."
+            subtitle="Substrate, models, lifecycle. The view beneath the agents."
             day={day} time={time}
           />
           <StudioSubstrate />
@@ -162,9 +151,9 @@ export default function StudioShell({ time, day }: StudioShellProps) {
     if (activeShared === 'kanban') {
       return (
         <>
-          <ChapterHeader numeral="VI" kicker="SELF · SHARED"
+          <ChapterHeader numeral="VI" kicker="SELF · KANBAN"
             title="Kanban" italic="task board"
-            subtitle="Project tracking across all profiles — drag, drop, ship."
+            subtitle="Project tracking across all profiles."
             day={day} time={time}
           />
           <KanbanView />
@@ -174,7 +163,7 @@ export default function StudioShell({ time, day }: StudioShellProps) {
     if (activeShared === 'journal') {
       return (
         <>
-          <ChapterHeader numeral="VII" kicker="SELF · SHARED"
+          <ChapterHeader numeral="VII" kicker="SELF · JOURNAL"
             title="Journal" italic="the logbook"
             subtitle="Chronological record of sessions, decisions, and reflections."
             day={day} time={time}
@@ -186,7 +175,7 @@ export default function StudioShell({ time, day }: StudioShellProps) {
     if (activeShared === 'goals') {
       return (
         <>
-          <ChapterHeader numeral="VIII" kicker="SELF · SHARED"
+          <ChapterHeader numeral="VIII" kicker="SELF · GOALS"
             title="Goals" italic="the roadmap"
             subtitle="Quarterly objectives and key results — shared across the fleet."
             day={day} time={time}
@@ -198,9 +187,9 @@ export default function StudioShell({ time, day }: StudioShellProps) {
     if (activeShared === 'skills') {
       return (
         <>
-          <ChapterHeader numeral="X" kicker="SELF · SHARED"
-            title="Skills" italic="the arsenal"
-            subtitle="Capabilities catalogue — web, vision, code exec, and more."
+          <ChapterHeader numeral="X" kicker="SELF · SKILLS"
+            title="Skills" italic="atelier"
+            subtitle="Every capability across the fleet."
             day={day} time={time}
           />
           <SharedSkillsView />
@@ -210,9 +199,9 @@ export default function StudioShell({ time, day }: StudioShellProps) {
     if (activeShared === 'settings') {
       return (
         <>
-          <ChapterHeader numeral="XI" kicker="SELF · SHARED"
-            title="Settings" italic="the control room"
-            subtitle="Global preferences, provider configuration, and workspace options."
+          <ChapterHeader numeral="XI" kicker="SELF · SETTINGS"
+            title="Settings" italic="the controls"
+            subtitle="Provider defaults, persistence, export."
             day={day} time={time}
           />
           <SettingsView />
@@ -222,9 +211,9 @@ export default function StudioShell({ time, day }: StudioShellProps) {
     if (activeShared === 'claw3d') {
       return (
         <>
-          <ChapterHeader numeral="XII" kicker="SELF · SHARED"
-            title="Claw3D" italic="office"
-            subtitle="Three-dimensional spatial workspace — shared office environment."
+          <ChapterHeader numeral="XII" kicker="WIRED · CLAW3D"
+            title="Office" italic="an office for your agents"
+            subtitle="The Claw3D 3D workspace, embedded."
             day={day} time={time}
           />
           <Claw3DView url={settings.claw3dUrl} />
@@ -239,40 +228,28 @@ export default function StudioShell({ time, day }: StudioShellProps) {
     if (!activeProfile) return null;
 
     const tab = (settings.profileTabs?.[activeProfile.id] ?? 'console') as ProfileTabId;
+    const tabMeta = PROFILE_TABS.find((t) => t.id === tab) || PROFILE_TABS[0];
+
+    const subtitle =
+      tab === 'console' ? 'Speak. The console saves itself.' :
+      tab === 'sessions' ? 'Every thread, every turn.' :
+      tab === 'skills' ? "What this agent can do for you." :
+      tab === 'memory' ? 'What this agent remembers about you.' :
+      'How this agent thinks, what it runs on.';
 
     return (
       <>
-        {/* Profile header */}
-        <div className="px-10 pt-10 pb-2 relative hx-fade-up">
-          {/* Numeral + kicker */}
-          <div className="flex items-center gap-3 mb-4">
-            <span className="hx-serif italic text-[18px]" style={{ color: activeProfile.accent }}>
-              II.
-            </span>
-            <span className="w-8 h-px" style={{ background: 'rgba(255,255,255,.18)' }} />
-            <span className="hx-mono text-[10px] uppercase tracking-[0.22em]" style={{ color: '#5a5a52' }}>
-              {activeProfile.name.toUpperCase()} · CONSOLE
-            </span>
-          </div>
-
-          {/* Title */}
-          <h1 className="hx-serif text-[58px] leading-[1.02] tracking-tight" style={{ color: '#e8e8e3' }}>
-            {activeProfile.name}
-            <span className="italic ml-3" style={{ color: '#c9a76c', fontStyle: 'italic' }}>
-              {activeProfile.role.toLowerCase()}
-            </span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="hx-serif italic text-[19px] mt-3" style={{ color: '#7a7a72' }}>
-            Speak. The console saves itself.
-          </p>
-
-          {/* Timestamp */}
-          <div className="hx-mono text-[10px] uppercase tracking-[0.22em] mt-5" style={{ color: '#c9a76c' }}>
-            {time} • {day.toUpperCase()} • NEW YORK
-          </div>
-        </div>
+        {/* Profile header — exact match to prototype */}
+        <ChapterHeader
+          numeral={tabMeta.numeral}
+          kicker={`${activeProfile.name.toUpperCase()} · ${tab.toUpperCase()}`}
+          title={activeProfile.name}
+          italic={activeProfile.role.toLowerCase()}
+          subtitle={subtitle}
+          day={day}
+          time={time}
+          accent={activeProfile.accent}
+        />
 
         {/* Tab pills */}
         <ProfileTabPills
@@ -283,15 +260,13 @@ export default function StudioShell({ time, day }: StudioShellProps) {
         />
 
         {/* Tab content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="px-10">
+          {tab === 'console' && <ProfileConsole profile={activeProfile} />}
           {tab === 'sessions' && <SessionsTab profile={activeProfile} />}
           {tab === 'skills' && <ProfileSkillsTab profile={activeProfile} />}
           {tab === 'memory' && <ProfileMemoryTab profile={activeProfile} />}
           {tab === 'config' && (
             <ProfileConfigTab profile={activeProfile} onEdit={() => setEditingProfile(activeProfile)} />
-          )}
-          {!['sessions', 'skills', 'memory', 'config'].includes(tab) && (
-            <ProfileConsole profile={activeProfile} />
           )}
         </div>
       </>
@@ -299,34 +274,40 @@ export default function StudioShell({ time, day }: StudioShellProps) {
   }
 
   return (
-    <div className="relative h-full w-full flex overflow-hidden" style={{ background: '#0A0A0E' }}>
+    <div
+      className="relative h-screen w-full overflow-hidden text-neutral-200"
+      style={{
+        background: '#0A0A0E',
+        '--accent': ambientAccent.accent,
+        '--accent-rgb': ambientAccent.rgb,
+      } as React.CSSProperties}
+    >
       {/* Ambient bg layers */}
       <div className="hx-ambient" aria-hidden="true" />
-      <div className="hx-grain"  aria-hidden="true" />
+      <div className="hx-grain" aria-hidden="true" />
 
-      {/* Sidebar */}
-      <Sidebar
-        time={time}
-        day={day}
-        onForgeProfile={() => setEditingProfile('new')}
-      />
+      <div className="relative flex h-full z-10">
+        {/* Sidebar */}
+        <Sidebar
+          time={time}
+          day={day}
+          onForgeProfile={() => setEditingProfile('new')}
+        />
 
-      {/* Main content area */}
-      <main
-        className="flex-1 relative min-w-0 flex flex-col overflow-hidden"
-        style={{ background: 'var(--bg, #0A0A0E)' }}
-      >
-        {/* Scrollable content */}
-        <div className="relative flex-1 overflow-y-auto hx-scroll">
-          {settings.mode === 'profile' && activeProfile
-            ? renderProfilePage()
-            : renderSharedSurface()
-          }
-        </div>
-      </main>
+        {/* Main content area */}
+        <main className="flex-1 relative min-w-0 overflow-hidden">
+          {/* Floating command palette trigger */}
+          <TopChrome onCmdK={() => setPaletteOpen((o) => !o)} />
 
-      {/* Floating command palette trigger */}
-      <TopChrome onCmdK={() => setPaletteOpen((o) => !o)} />
+          {/* Scrollable content */}
+          <div className="h-full overflow-y-auto hx-scroll">
+            {settings.mode === 'profile' && activeProfile
+              ? renderProfilePage()
+              : renderSharedSurface()
+            }
+          </div>
+        </main>
+      </div>
 
       {/* Overlays */}
       {paletteOpen && (

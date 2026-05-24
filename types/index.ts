@@ -13,6 +13,7 @@ export type ProviderId =
   | 'vllm'
   | 'llamacpp'
   | 'openai'
+  | 'anthropic'
   | 'custom';
 
 export type ProfileStatus =
@@ -95,6 +96,7 @@ export interface Skill {
   name: string;
   group: 'Core' | 'Knowledge' | 'Files' | 'Multimodal' | 'Tools';
   desc: string;
+  icon?: React.ReactNode;
 }
 
 export interface Settings {
@@ -117,16 +119,17 @@ export interface ProviderPreset {
 }
 
 export const PROVIDERS: Record<ProviderId, ProviderPreset> = {
-  'lm-studio':  { label: 'LM Studio',           endpoint: 'http://localhost:1234',    icon: '⌬', auth: false, cors: 'Enable CORS in LM Studio → Server settings.' },
-  'ollama':     { label: 'Ollama',              endpoint: 'http://localhost:11434',   icon: '◉', auth: false, cors: 'Set OLLAMA_ORIGINS="*" before starting Ollama.' },
-  'mlx-lm':     { label: 'MLX (mlx_lm.server)', endpoint: 'http://localhost:8080',    icon: '◈', auth: false, cors: 'Serve Studio from same origin via local server.' },
-  'mlx-vlm':    { label: 'MLX-VLM',             endpoint: 'http://localhost:8080',    icon: '◇', auth: false, cors: 'Serve Studio from same origin via local server.' },
-  'mlx-openai': { label: 'mlx-openai-server',   endpoint: 'http://localhost:8000',    icon: '◬', auth: false, cors: 'Pass --cors "*" or serve Studio locally.' },
-  'inferencer': { label: 'Inferencer',          endpoint: 'http://localhost:8000',    icon: '◍', auth: false, cors: 'Verify CORS headers for localhost.' },
-  'vllm':       { label: 'vLLM',                endpoint: 'http://localhost:8000',    icon: '⬢', auth: false, cors: 'Start with --allowed-origins "*".' },
-  'llamacpp':   { label: 'llama.cpp',           endpoint: 'http://localhost:8080',    icon: '⌗', auth: false, cors: 'Add --cors-allow-origin "*" to llama-server.' },
-  'openai':     { label: 'OpenAI',              endpoint: 'https://api.openai.com',   icon: '◐', auth: true,  cors: '' },
-  'custom':     { label: 'Custom (OAI-compat)', endpoint: 'http://localhost:8000',    icon: '◯', auth: false, cors: '' },
+  'lm-studio':  { label: 'LM Studio',            endpoint: 'http://localhost:1234',    icon: '⌬', auth: false, cors: 'Enable CORS in LM Studio → Server settings.' },
+  'ollama':     { label: 'Ollama',               endpoint: 'http://localhost:11434',   icon: '◉', auth: false, cors: 'Set OLLAMA_ORIGINS="*" before starting Ollama.' },
+  'mlx-lm':     { label: 'MLX (mlx_lm.server)',  endpoint: 'http://localhost:8080',    icon: '◈', auth: false, cors: 'Serve Studio from same origin via local server.' },
+  'mlx-vlm':    { label: 'MLX-VLM',              endpoint: 'http://localhost:8080',    icon: '◇', auth: false, cors: 'Serve Studio from same origin via local server.' },
+  'mlx-openai': { label: 'mlx-openai-server',    endpoint: 'http://localhost:8000',    icon: '◬', auth: false, cors: 'Pass --cors "*" or serve Studio locally.' },
+  'inferencer': { label: 'Inferencer',           endpoint: 'http://localhost:8000',    icon: '◍', auth: false, cors: 'Verify CORS headers for localhost.' },
+  'vllm':       { label: 'vLLM',                 endpoint: 'http://localhost:8000',    icon: '⬢', auth: false, cors: 'Start with --allowed-origins "*".' },
+  'llamacpp':   { label: 'llama.cpp',            endpoint: 'http://localhost:8080',    icon: '⌗', auth: false, cors: 'Add --cors-allow-origin "*" to llama-server.' },
+  'openai':     { label: 'OpenAI',               endpoint: 'https://api.openai.com',   icon: '◐', auth: true,  cors: '' },
+  'anthropic':  { label: 'Anthropic',            endpoint: 'https://api.anthropic.com', icon: '◆', auth: true,  cors: 'Anthropic API uses /v1/messages, not OpenAI shape.' },
+  'custom':     { label: 'Custom (OAI-compat)',  endpoint: 'http://localhost:8000',    icon: '◯', auth: false, cors: '' },
 };
 
 export const ACCENT_PALETTE = [
@@ -181,6 +184,63 @@ export const DEFAULT_PROFILES: Profile[] = [
     skills: ['web', 'memory', 'code', 'docs'],
     status: 'unknown',
   },
+  {
+    id: 'mercury',
+    name: 'Mercury',
+    role: 'Markets',
+    accent: '#7FE38E',
+    accentRGB: '127,227,142',
+    systemPrompt:
+      'You are Mercury, a markets-focused agent. Numerate. Skeptical. Fast.',
+    connection: {
+      provider: 'mlx-lm',
+      endpoint: 'http://localhost:8080',
+      modelId: '',
+      apiKey: '',
+      temperature: 0.5,
+      maxTokens: 4096,
+    },
+    skills: ['markets', 'code', 'memory', 'web'],
+    status: 'unknown',
+  },
+  {
+    id: 'iris',
+    name: 'Iris',
+    role: 'Research',
+    accent: '#F5B041',
+    accentRGB: '245,176,65',
+    systemPrompt:
+      'You are Iris, the research agent. Long context, careful synthesis, cite everything.',
+    connection: {
+      provider: 'inferencer',
+      endpoint: 'http://localhost:8000',
+      modelId: '',
+      apiKey: '',
+      temperature: 0.6,
+      maxTokens: 8192,
+    },
+    skills: ['web', 'docs', 'vision', 'memory', 'vector'],
+    status: 'unknown',
+  },
+  {
+    id: 'echo',
+    name: 'Echo',
+    role: 'Voice',
+    accent: '#D96AB5',
+    accentRGB: '217,106,181',
+    systemPrompt:
+      'You are Echo. Brief replies. Voice-first phrasing.',
+    connection: {
+      provider: 'mlx-vlm',
+      endpoint: 'http://localhost:8080',
+      modelId: '',
+      apiKey: '',
+      temperature: 0.7,
+      maxTokens: 1024,
+    },
+    skills: ['voice', 'memory'],
+    status: 'unknown',
+  },
 ];
 
 export const SKILLS: Skill[] = [
@@ -197,7 +257,7 @@ export const SKILLS: Skill[] = [
 ];
 
 export const SHARED_SURFACES = [
-  { id: 'mission',   label: 'Mission Control', icon: null, numeral: 'I'   }, // icon set in component
+  { id: 'mission',   label: 'Mission Control', icon: null, numeral: 'I'   },
   { id: 'memory',    label: 'Memory',           icon: null, numeral: 'V'   },
   { id: 'kanban',    label: 'Kanban',           icon: null, numeral: 'VI'  },
   { id: 'journal',   label: 'Journal',          icon: null, numeral: 'VII' },
