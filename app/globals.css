@@ -19,6 +19,18 @@
   --color-bg: #0A0A0E;
   --color-brass: #c9a76c;
   --color-brass-dim: #8c7449;
+
+  /* Profile accent colors */
+  --atlas: #5DADE2;
+  --atlas-rgb: 93, 173, 226;
+  --hermes: #9B7BFF;
+  --hermes-rgb: 155, 123, 255;
+  --mercury: #7FE38E;
+  --mercury-rgb: 127, 227, 142;
+  --iris: #F5B041;
+  --iris-rgb: 245, 176, 65;
+  --echo: #D96AB5;
+  --echo-rgb: 217, 106, 181;
 }
 
 /* ── Base Reset ─────────────────────────────────────────────────────────── */
@@ -97,11 +109,17 @@ body {
   to   { transform: none;          opacity: 1; }
 }
 
+@keyframes hx-glow {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 4px currentColor); }
+  50%       { filter: brightness(1.2) drop-shadow(0 0 8px currentColor); }
+}
+
 .hx-fade-up  { animation: hx-fade-up  0.55s cubic-bezier(.2,.7,.2,1) forwards; }
 .hx-pulse    { animation: hx-pulse    1.4s  ease-in-out infinite; }
 .hx-breathe  { animation: hx-breathe  2.6s  ease-in-out infinite; }
 .hx-bob      { animation: hx-bob      3.4s  ease-in-out infinite; }
 .hx-slidein  { animation: hx-slidein  0.4s  cubic-bezier(.2,.7,.2,1) forwards; }
+.hx-glow     { animation: hx-glow     2s  ease-in-out infinite; }
 
 /* Blinking streaming caret */
 .hx-caret {
@@ -151,7 +169,7 @@ body {
   filter: brightness(1.1) saturate(1.1);
 }
 
-/* ── Glass Surface ─────────────────────────────────────────────────────── */
+/* ── Glass Surface (premium) ─────────────────────────────────────────────── */
 .hx-glass {
   background:
     linear-gradient(140deg,
@@ -178,6 +196,20 @@ body {
     0 1px 0 rgba(255,255,255,.1) inset,
     0 12px 48px rgba(0,0,0,.5),
     0 2px 4px rgba(0,0,0,.4);
+}
+
+/* Subtle glass — for cards that need less opacity */
+.hx-glass-subtle {
+  background:
+    linear-gradient(140deg,
+      rgba(255,255,255,.025) 0%,
+      rgba(255,255,255,.008) 100%);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255,255,255,.04);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.03) inset,
+    0 4px 16px rgba(0,0,0,.2);
 }
 
 /* ── Skeleton Pill Button ───────────────────────────────────────────────── */
@@ -368,7 +400,8 @@ textarea:focus {
   .hx-breathe,
   .hx-bob,
   .hx-slidein,
-  .hx-caret {
+  .hx-caret,
+  .hx-glow {
     animation: none;
     opacity: 1;
     transform: none;

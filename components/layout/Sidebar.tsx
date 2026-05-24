@@ -1,28 +1,34 @@
 'use client';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Sidebar — Minimal ChatGPT-style left rail
-// - Thin, always-visible rail (no heavy chrome)
-// - Profiles at top → shared nav below
-// - Active item: accent-colored background pill + left indicator bar
-// - No Roman numerals in nav items (kept only on ChapterHeaders)
+// Sidebar — Premium glassmorphic left panel
+// - Wide panel (280px) with FLEET / SHARED / WIRED sections
+// - Glowing colored orbs for profiles
+// - Roman numerals for shared surfaces
+// - Active state: blue glass border box
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useStudioStore } from '@/stores';
 import type { SharedSurfaceId } from '@/types';
+import { SHARED_SURFACES } from '@/types';
 
-const SHARED_SURFACES: Array<{ id: SharedSurfaceId; label: string }> = [
-  { id: 'mission',   label: 'Mission Control' },
-  { id: 'studio',    label: 'Studio'           },
-  { id: 'memory',    label: 'Memory'            },
-  { id: 'kanban',    label: 'Kanban'            },
-  { id: 'journal',   label: 'Journal'           },
-  { id: 'goals',     label: 'Goals'             },
-  { id: 'skills',    label: 'Skills'            },
-  { id: 'settings',  label: 'Settings'          },
-];
+// ── Glowing Orb ──────────────────────────────────────────────────────────────
 
-// ── Icons (inline SVG, no dep) ───────────────────────────────────────────────
+function GlowingOrb({ color, rgb, size = 14 }: { color: string; rgb: string; size?: number }) {
+  return (
+    <div
+      className="shrink-0 rounded-full hx-breathe"
+      style={{
+        width: size,
+        height: size,
+        background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,.9) 0%, transparent 30%), radial-gradient(circle at 50% 50%, ${color} 0%, ${color}88 60%, ${color}33 100%)`,
+        boxShadow: `0 0 ${size}px rgba(${rgb},.5), 0 0 ${size * 2}px rgba(${rgb},.25), inset 0 -1px 2px rgba(0,0,0,.3)`,
+      }}
+    />
+  );
+}
+
+// ── Shared Surface Icons ─────────────────────────────────────────────────────
 
 function IconMission({ size = 15 }: { size?: number }) {
   return (
@@ -31,16 +37,6 @@ function IconMission({ size = 15 }: { size?: number }) {
       <circle cx="12" cy="12" r="10" />
       <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"
                fill="currentColor" stroke="none" opacity=".85" />
-    </svg>
-  );
-}
-
-function IconStudio({ size = 15 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="3" width="20" height="14" rx="2" />
-      <path d="M8 21h8M12 17v4" />
     </svg>
   );
 }
@@ -86,6 +82,16 @@ function IconGoals({ size = 15 }: { size?: number }) {
   );
 }
 
+function IconStudio({ size = 15 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2" />
+      <path d="M8 21h8M12 17v4" />
+    </svg>
+  );
+}
+
 function IconSkills({ size = 15 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -107,67 +113,75 @@ function IconSettings({ size = 15 }: { size?: number }) {
   );
 }
 
-const SURFACE_ICONS: Record<SharedSurfaceId, React.ReactNode> = {
+const SURFACE_ICONS: Record<string, React.ReactNode> = {
   mission: <IconMission size={14} />,
-  studio:  <IconStudio size={14} />,
   memory:  <IconMemory size={14} />,
   kanban:  <IconKanban size={14} />,
   journal: <IconJournal size={14} />,
   goals:   <IconGoals size={14} />,
+  studio:  <IconStudio size={14} />,
   skills:  <IconSkills size={14} />,
   settings:<IconSettings size={14} />,
-  claw3d:  null, // rarely used
+  claw3d:  null,
 };
+
+// Shared surfaces shown in sidebar (matching mockup: Mission, Memory, Kanban, Journal)
+const SIDEBAR_SHARED: Array<{ id: SharedSurfaceId; label: string; numeral: string }> = [
+  { id: 'mission',  label: 'MISSION CONTROL', numeral: 'I'   },
+  { id: 'memory',   label: 'MEMORY',          numeral: 'V'   },
+  { id: 'kanban',   label: 'KANBAN',          numeral: 'VI'  },
+  { id: 'journal',  label: 'JOURNAL',         numeral: 'VII' },
+];
 
 // ── Main component ───────────────────────────────────────────────────────────
 
 interface SidebarProps {
   time: string;
   day: string;
+  onForgeProfile: () => void;
 }
 
-export default function Sidebar({ time }: SidebarProps) {
+export default function Sidebar({ time, day, onForgeProfile }: SidebarProps) {
   const profiles         = useStudioStore((s) => s.profiles);
   const settings         = useStudioStore((s) => s.settings);
   const setModeAndNavigate = useStudioStore((s) => s.setModeAndNavigate);
 
-  const { mode, activeProfileId } = settings;
-  const activeShared = settings.activeShared;
+  const { mode, activeProfileId, activeShared } = settings;
 
-  function navItem(
-    id: string,
-    label: string,
-    icon?: React.ReactNode,
-    isActive = false,
-    accentRGB = '201,167,108',
-    onClick?: () => void
-  ) {
+  function sharedNavItem(item: typeof SIDEBAR_SHARED[0]) {
+    const isActive = mode === 'shared' && activeShared === item.id;
     return (
       <button
-        key={id}
-        onClick={onClick}
-        className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-150 text-left group relative"
+        key={item.id}
+        onClick={() => setModeAndNavigate('shared', item.id)}
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative"
         style={{
-          background: isActive ? `rgba(${accentRGB},.1)` : 'transparent',
-          borderLeft: isActive ? `2px solid rgba(${accentRGB},.7)` : '2px solid transparent',
+          background: isActive
+            ? 'linear-gradient(180deg, rgba(59,130,246,.12) 0%, rgba(59,130,246,.04) 100%)'
+            : 'transparent',
+          border: isActive ? '1px solid rgba(59,130,246,.35)' : '1px solid transparent',
         }}
       >
-        {icon && (
-          <span
-            className="shrink-0 transition-colors"
-            style={{ color: isActive ? '#e8e8e3' : '#5a5a52' }}
-          >
-            {icon}
-          </span>
-        )}
         <span
-          className="text-[13px] truncate transition-colors"
+          className="shrink-0 transition-colors"
+          style={{ color: isActive ? '#60a5fa' : '#5a5a52' }}
+        >
+          {SURFACE_ICONS[item.id]}
+        </span>
+        <span
+          className="flex-1 text-[11px] font-medium tracking-wider truncate transition-colors"
           style={{
             color: isActive ? '#e8e8e3' : '#7a7a72',
-            fontWeight: isActive ? 450 : 400,
+            fontFamily: "'Inter Tight', sans-serif",
           }}
         >
-          {label}
+          {item.label}
+        </span>
+        <span
+          className="hx-mono text-[9px] shrink-0"
+          style={{ color: isActive ? 'rgba(59,130,246,.6)' : '#3a3a36' }}
+        >
+          {item.numeral}
         </span>
       </button>
     );
@@ -175,88 +189,130 @@ export default function Sidebar({ time }: SidebarProps) {
 
   return (
     <aside
-      className="w-[240px] shrink-0 flex flex-col relative z-20"
+      className="w-[280px] shrink-0 flex flex-col relative z-20"
       style={{
-        background: 'rgba(9,9,13,.95)',
+        background: 'linear-gradient(180deg, rgba(9,9,13,.97) 0%, rgba(6,6,10,.97) 100%)',
         borderRight: '1px solid rgba(255,255,255,.05)',
         backdropFilter: 'blur(24px)',
       }}
     >
-      {/* ── Header — wordmark only ─────────────────────────────── */}
-      <div
-        className="shrink-0 px-4 py-4 flex items-center justify-between"
-        style={{ borderBottom: '1px solid rgba(255,255,255,.04)' }}
-      >
-        <span
-          className="hx-serif text-[18px] tracking-tight leading-none"
-          style={{ color: '#e8e8e3' }}
-        >
-          Hermes<span style={{ color: 'var(--accent, #c9a76c)', fontStyle: 'italic', fontSize: 14 }}> studio</span>
-        </span>
-        <span
-          className="hx-mono text-[9px] uppercase tracking-wider"
-          style={{ color: '#3a3a36' }}
-        >
-          {time}
-        </span>
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <div className="shrink-0 px-5 pt-5 pb-3">
+        {/* Time + location */}
+        <div className="flex items-center gap-1.5 mb-3">
+          <span className="hx-mono text-[10px] tracking-wider" style={{ color: '#c9a76c' }}>
+            {time} EST
+          </span>
+          <span className="hx-mono text-[10px]" style={{ color: '#5a5a52' }}>•</span>
+          <span className="hx-mono text-[10px] tracking-wider" style={{ color: '#c9a76c' }}>
+            NEW YORK
+          </span>
+        </div>
+
+        {/* Wordmark */}
+        <div className="hx-serif tracking-tight leading-none" style={{ fontSize: '22px', color: '#e8e8e3' }}>
+          Hermes<span style={{ color: '#c9a76c', fontStyle: 'italic', fontSize: '16px', marginLeft: '2px' }}>studio</span>
+        </div>
       </div>
 
-      {/* ── Scrollable nav area ─────────────────────────────────── */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-5">
+      {/* ── Scrollable nav ─────────────────────────────────────────── */}
+      <nav className="flex-1 overflow-y-auto hx-scroll py-2 px-3 space-y-5">
 
-        {/* Fleet — profiles */}
+        {/* ── FLEET ──────────────────────────────────────────────── */}
         <div>
           <p
-            className="px-3 pb-2 hx-mono text-[9.5px] uppercase tracking-[0.2em]"
-            style={{ color: '#3a3a36' }}
+            className="px-3 pb-2 hx-mono text-[9px] uppercase tracking-[0.25em]"
+            style={{ color: '#4a4a42' }}
           >
-            Profiles
+            Fleet
           </p>
-          {profiles.map((p) => {
-            const active = mode === 'profile' && p.id === activeProfileId;
-            return navItem(
-              p.id,
-              p.name,
-              <div
-                className="w-5 h-5 rounded-full shrink-0"
-                style={{
-                  background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,.9) 0%, transparent 28%), radial-gradient(circle at 50% 50%, ${p.accent} 0%, ${p.accent}88)`,
-                }}
-              />,
-              active,
-              p.accentRGB,
-              () => setModeAndNavigate('profile', p.id)
-            );
-          })}
+          <div className="space-y-0.5">
+            {profiles.map((p) => {
+              const active = mode === 'profile' && p.id === activeProfileId;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => setModeAndNavigate('profile', p.id)}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group"
+                  style={{
+                    background: active
+                      ? 'linear-gradient(180deg, rgba(59,130,246,.12) 0%, rgba(59,130,246,.04) 100%)'
+                      : 'transparent',
+                    border: active ? '1px solid rgba(59,130,246,.35)' : '1px solid transparent',
+                  }}
+                >
+                  <GlowingOrb color={p.accent} rgb={p.accentRGB} size={16} />
+                  <div className="flex-1 min-w-0 text-left">
+                    <div
+                      className="text-[13px] font-medium truncate transition-colors"
+                      style={{
+                        color: active ? '#e8e8e3' : '#9a9a92',
+                        fontFamily: "'Inter Tight', sans-serif",
+                      }}
+                    >
+                      {p.name}
+                    </div>
+                    <div
+                      className="hx-mono text-[9px] uppercase tracking-wider truncate transition-colors"
+                      style={{ color: active ? 'rgba(148,163,184,.6)' : '#4a4a42' }}
+                    >
+                      {p.connection.provider === 'lm-studio' ? 'LM STUDIO' :
+                       p.connection.provider === 'ollama' ? 'OLLAMA' :
+                       p.connection.provider === 'mlx-lm' ? 'MLX' :
+                       p.connection.provider === 'mlx-vlm' ? 'MLX-VLM' :
+                       p.connection.provider === 'inferencer' ? 'INFERENCE' :
+                       p.connection.provider.toUpperCase()}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Forge profile button */}
+          <button
+            onClick={onForgeProfile}
+            className="w-full mt-2 px-3 py-2 rounded-xl text-[11px] transition-all duration-200 hover:bg-white/[0.04] flex items-center gap-2"
+            style={{ color: '#7a7a72', fontFamily: "'Inter Tight', sans-serif" }}
+          >
+            <span style={{ color: '#5a5a52' }}>+</span> Forge profile
+          </button>
         </div>
 
         {/* Divider */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,.04)' }} />
 
-        {/* Shared surfaces */}
+        {/* ── SHARED ─────────────────────────────────────────────── */}
         <div>
           <p
-            className="px-3 pb-2 hx-mono text-[9.5px] uppercase tracking-[0.2em]"
-            style={{ color: '#3a3a36' }}
+            className="px-3 pb-2 hx-mono text-[9px] uppercase tracking-[0.25em]"
+            style={{ color: '#4a4a42' }}
           >
             Shared
           </p>
-          {SHARED_SURFACES.map(({ id, label }) =>
-            navItem(id, label, SURFACE_ICONS[id], mode === 'shared' && activeShared === id,
-              '201,167,108', () => setModeAndNavigate('shared', id))
-          )}
+          <div className="space-y-0.5">
+            {SIDEBAR_SHARED.map(sharedNavItem)}
+          </div>
         </div>
-
       </nav>
 
-      {/* ── Footer — Claw3D link ─────────────────────────────────── */}
+      {/* ── WIRED footer ─────────────────────────────────────────── */}
       <div
-        className="shrink-0 px-2 pb-4 pt-1"
+        className="shrink-0 px-5 py-4 space-y-1.5"
         style={{ borderTop: '1px solid rgba(255,255,255,.04)' }}
       >
-        {navItem('claw3d', 'Claw3D · Office', SURFACE_ICONS.claw3d,
-          mode === 'shared' && activeShared === 'claw3d',
-          '201,167,108', () => setModeAndNavigate('shared', 'claw3d'))}
+        <div className="flex items-center gap-2">
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ background: '#7FE38E', boxShadow: '0 0 6px rgba(127,227,142,.5)' }}
+          />
+          <span className="hx-mono text-[9px]" style={{ color: '#5a5a52' }}>
+            localStorage • {profiles.length} profile{profiles.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <div className="hx-mono text-[9px]" style={{ color: '#3a3a36' }}>
+          single-file build • v0.1
+        </div>
       </div>
     </aside>
   );
