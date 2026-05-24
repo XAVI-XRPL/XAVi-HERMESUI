@@ -1,33 +1,45 @@
 'use client';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TopChrome — Floating ⌘K command palette trigger, top-right
-// Ported from hermes-studio.html prototype App() → TopChrome()
+// TopChrome — Minimal floating ⌘K command palette trigger (ChatGPT-style)
+// Sticks to top-right corner of the main content area.
 // ─────────────────────────────────────────────────────────────────────────────
 
-function IconCmd({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 3a3 3 0 1 0 0 6h-3V6a3 3 0 1 0-6 0v3H6a3 3 0 1 0 0 6h3v3a3 3 0 1 0 6 0v-3h3a3 3 0 1 0 0-6h-3V6a3 3 0 0 0 3-3Z" />
-    </svg>
-  );
-}
-
-interface TopChromeProps {
+interface Props {
   onCmdK: () => void;
 }
 
-export default function TopChrome({ onCmdK }: TopChromeProps) {
+export default function TopChrome({ onCmdK }: Props) {
   return (
-    <div className="absolute top-5 right-6 z-30 flex items-center gap-2">
+    <div className="absolute top-3 right-4 z-20 flex items-center gap-2">
+      {/* ⌘K palette trigger */}
       <button
         onClick={onCmdK}
-        className="hx-pill px-3 py-1.5 rounded-lg flex items-center gap-2 text-[11px] text-neutral-300"
+        title="Command Palette (⌘K)"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[11px] transition-all duration-150 hover:bg-white/[0.05]"
+        style={{
+          background: 'rgba(255,255,255,.04)',
+          border: '1px solid rgba(255,255,255,.07)',
+          color: '#6a6a62',
+        }}
       >
-        <span className="hx-amber-dim"><IconCmd size={14} /></span>
-        <span className="hx-mono uppercase tracking-wider">Command</span>
-        <kbd className="hx-key">⌘K</kbd>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth={1.8} className="shrink-0">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <span>Search</span>
+        <kbd
+          className="hx-mono text-[9px] uppercase tracking-wider"
+          style={{
+            background: 'rgba(255,255,255,.06)',
+            borderRadius: 4,
+            padding: '1px 5px',
+            color: '#4a4a42',
+          }}
+        >
+          ⌘K
+        </kbd>
       </button>
     </div>
   );

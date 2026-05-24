@@ -1,41 +1,63 @@
 'use client';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Mission Control — Dashboard landing surface (ChatGPT-home style)
+// Stat row at top + quick-access grid below
+// ─────────────────────────────────────────────────────────────────────────────
+
 import { useStudioStore } from '@/stores';
 
-// Live telemetry cards — "not yet wired" until provider streaming is connected.
-// The store gives us profiles + sessions to display.
-
-function StatCard({
-  label,
-  value,
-  sub,
-  accent = '#c9a76c',
-}: {
-  label: string;
-  value: string | number;
-  sub?: string;
-  accent?: string;
+function StatCard({ label, value, accent = '#c9a76c', rgb = '201,167,108' }: {
+  label: string; value: string | number; accent?: string; rgb?: string;
 }) {
   return (
     <div
-      className="hx-glass rounded-2xl p-5 flex flex-col gap-1 min-w-[140px]"
-      style={{ borderColor: 'rgba(255,255,255,.06)' }}
+      className="rounded-2xl p-5 relative overflow-hidden"
+      style={{
+        background: 'rgba(255,255,255,.03)',
+        border: '1px solid rgba(255,255,255,.06)',
+      }}
     >
-      <span className="hx-mono text-[9.5px] uppercase tracking-[0.22em] hx-amber-dim">
+      {/* Subtle accent glow */}
+      <div
+        className="absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-15 blur-2xl pointer-events-none"
+        style={{ background: accent }}
+      />
+      <p className="hx-mono text-[10px] uppercase tracking-wider mb-3" style={{ color: '#4a4a42' }}>
         {label}
-      </span>
-      <span
-        className="hx-serif text-4xl leading-none"
+      </p>
+      <p
+        className="hx-serif text-[38px] leading-none"
         style={{ color: accent }}
       >
         {value}
-      </span>
-      {sub && (
-        <span className="hx-mono text-[9px] text-neutral-500 uppercase tracking-wider">
-          {sub}
-        </span>
-      )}
+      </p>
     </div>
+  );
+}
+
+function QuickCard({ label, sub, icon, onClick }: {
+  label: string; sub?: string; icon?: React.ReactNode; onClick?: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full text-left rounded-2xl p-5 transition-all duration-150 hover:bg-white/[0.035] group"
+      style={{
+        background: 'rgba(255,255,255,.025)',
+        border: '1px solid rgba(255,255,255,.06)',
+      }}
+    >
+      {icon && (
+        <div className="mb-3 text-neutral-500 group-hover:text-neutral-300 transition-colors">
+          {icon}
+        </div>
+      )}
+      <p className="text-[14px] font-medium mb-1" style={{ color: '#d4d4cc' }}>{label}</p>
+      {sub && (
+        <p className="hx-mono text-[10.5px]" style={{ color: '#3a3a36' }}>{sub}</p>
+      )}
+    </button>
   );
 }
 
@@ -43,176 +65,164 @@ export default function MissionControl() {
   const profiles = useStudioStore((s) => s.profiles);
   const sessions = useStudioStore((s) => s.sessions);
 
-  const totalSessions = Object.keys(sessions).length;
-  const activeProfiles = profiles.filter(
-    (p) => p.status === 'connected' || p.status === 'working'
-  ).length;
+  const totalSessions   = Object.keys(sessions).length;
+  const activeConnected = profiles.filter((p) => p.status === 'connected' || p.status === 'working').length;
+
+  // Quick actions
+  const setModeAndNavigate = useStudioStore((s) => s.setModeAndNavigate);
+  const firstProfile       = profiles[0];
+  const defaultProfile     = firstProfile?.id ?? null;
 
   return (
-    <div className="px-10 pb-12 flex flex-col gap-8">
-      {/* ── Stat row ─────────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-4 flex-wrap hx-fade-up">
-        <StatCard label="Fleet" value={profiles.length} sub="agents online" accent="#5DADE2" />
+    <div className="px-10 pb-16">
+      {/* ── Stat row (4 cards, like ChatGPT home stats) ─────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8 hx-fade-up" style={{ animationDelay: '0ms' }}>
+        <StatCard label="Profiles" value={profiles.length} accent="#c9a76c" rgb="201,167,108" />
+        <StatCard label="Sessions" value={totalSessions}  accent="#5DADE2" rgb="93,173,226" />
+        <StatCard label="Connected" value={`${activeConnected}/${profiles.length}`} accent="#7FE38E" rgb="127,227,142" />
         <StatCard
-          label="Sessions"
-          value={totalSessions}
-          sub={`across ${activeProfiles} active`}
-          accent="#9B7BFF"
+          label="Runtime"
+          value={Math.floor((Date.now() - (Object.values(sessions)[0]?.createdAt ?? Date.now())) / 86400000) + 'd'}
+          accent="#D96AB5" rgb="217,106,181"
         />
-        <StatCard
-          label="Shared Surfaces"
-          value={9}
-          sub="mission → claw3d"
-          accent="#c9a76c"
-        />
-        <StatCard label="Status" value="READY" sub="est · new york" accent="#7FE38E" />
       </div>
 
-      {/* ── Profile fleet status cards ─────────────────────────────────────────── */}
-      <div>
-        <div className="hx-mono text-[9.5px] uppercase tracking-[0.22em] hx-amber-dim mb-4">
-          Fleet Status
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {profiles.map((p) => (
-            <div
-              key={p.id}
-              className="hx-glass rounded-xl p-4 flex items-start gap-4"
-              style={{ borderColor: 'rgba(255,255,255,.06)' }}
-            >
-              {/* Orb */}
-              <div
-                className="w-9 h-9 hx-orb shrink-0 mt-0.5"
-                style={{
-                  '--accent': p.accent,
-                  '--accent-rgb': p.accentRGB,
-                } as React.CSSProperties}
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2 mb-0.5">
-                  <span className="text-[14px] font-medium text-neutral-100 truncate">{p.name}</span>
-                  <StatusPill status={p.status} />
-                </div>
-                <div className="hx-mono text-[9.5px] uppercase tracking-wider text-neutral-500 mb-1">
-                  {p.role}
-                </div>
+      {/* ── Quick access grid ─────────────────────────────────────── */}
+      <p className="hx-mono text-[10px] uppercase tracking-wider mb-3" style={{ color: '#3a3a36' }}>
+        Jump in
+      </p>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 hx-fade-up" style={{ animationDelay: '80ms' }}>
+
+        {/* New chat */}
+        <QuickCard
+          label={firstProfile ? `Chat with ${firstProfile.name}` : 'Start a session'}
+          sub={firstProfile?.connection.modelId || firstProfile?.connection.provider || 'No profile yet'}
+          onClick={() => {
+            if (defaultProfile) setModeAndNavigate('profile', defaultProfile);
+          }}
+          icon={
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" strokeWidth={1.6}>
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"
+                    fill="currentColor" stroke="none" opacity=".6" />
+            </svg>
+          }
+        />
+
+        {/* Studio */}
+        <QuickCard
+          label="Studio · Substrate"
+          sub={activeConnected > 0 ? `${activeConnected} provider${activeConnected > 1 ? 's' : ''} hot` : 'No providers'}
+          onClick={() => setModeAndNavigate('shared', 'studio')}
+          icon={
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" strokeWidth={1.6}>
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <path d="M8 21h8M12 17v4" />
+            </svg>
+          }
+        />
+
+        {/* Kanban */}
+        <QuickCard
+          label="Kanban"
+          sub="Task board"
+          onClick={() => setModeAndNavigate('shared', 'kanban')}
+          icon={
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" strokeWidth={1.6}>
+              <rect x="3" y="3" width="7" height="18" rx="2" />
+              <rect x="14" y="3" width="7" height="10" rx="2" />
+            </svg>
+          }
+        />
+
+        {/* Journal */}
+        <QuickCard
+          label="Journal"
+          sub="Session log"
+          onClick={() => setModeAndNavigate('shared', 'journal')}
+          icon={
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" strokeWidth={1.6}>
+              <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"
+                    fill="currentColor" stroke="none" opacity=".6" />
+            </svg>
+          }
+        />
+
+        {/* Memory */}
+        <QuickCard
+          label="Memory"
+          sub="Vector store"
+          onClick={() => setModeAndNavigate('shared', 'memory')}
+          icon={
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" strokeWidth={1.6}>
+              <path d="M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+            </svg>
+          }
+        />
+
+        {/* Goals */}
+        <QuickCard
+          label="Goals"
+          sub="Roadmap"
+          onClick={() => setModeAndNavigate('shared', 'goals')}
+          icon={
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" strokeWidth={1.6}>
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="6" />
+              <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" opacity=".7" />
+            </svg>
+          }
+        />
+
+      </div>
+
+      {/* ── Profile status grid (like ChatGPT's model selector row) ─── */}
+      {profiles.length > 0 && (
+        <>
+          <p className="hx-mono text-[10px] uppercase tracking-wider mt-8 mb-3" style={{ color: '#3a3a36' }}>
+            Fleet · {profiles.length} profile{profiles.length !== 1 ? 's' : ''}
+          </p>
+          <div className="space-y-1.5">
+            {profiles.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setModeAndNavigate('profile', p.id, 'console')}
+                className="w-full flex items-center gap-3 rounded-xl px-4 py-3 transition hover:bg-white/[0.025]"
+                style={{ background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.04)' }}
+              >
                 <div
-                  className="text-[10.5px] hx-mono truncate"
-                  style={{ color: 'rgba(255,255,255,.35)' }}
-                >
-                  {p.connection.provider.replace(/-/g, ' ')} ·{' '}
-                  {p.connection.modelId || 'no model'}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Recent sessions ───────────────────────────────────────────────────── */}
-      <div>
-        <div className="hx-mono text-[9.5px] uppercase tracking-[0.22em] hx-amber-dim mb-4">
-          Recent Sessions
-        </div>
-        {totalSessions === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="space-y-2">
-            {Object.values(sessions)
-              .sort((a, b) => b.updatedAt - a.updatedAt)
-              .slice(0, 6)
-              .map((s) => {
-                const profile = profiles.find((p) => p.id === s.profileId);
-                return (
-                  <div
-                    key={s.id}
-                    className="hx-glass rounded-xl px-4 py-3 flex items-center gap-4"
-                    style={{ borderColor: 'rgba(255,255,255,.06)' }}
-                  >
-                    <div
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{
-                        background: profile?.accent ?? '#c9a76c',
-                        boxShadow: `0 0 6px ${profile?.accent ?? '#c9a76c'}`,
-                      }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[13px] text-neutral-200 truncate font-medium">
-                        {s.title}
-                      </div>
-                      <div className="hx-mono text-[9.5px] uppercase tracking-wider text-neutral-500">
-                        {profile?.name ?? 'unknown'} · {s.turns.length} turns
-                      </div>
-                    </div>
-                    <span className="hx-mono text-[9px] hx-amber-dim shrink-0">
-                      {relativeTime(s.updatedAt)}
+                  className="w-7 h-7 rounded-full shrink-0"
+                  style={{
+                    background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,.9) 0%, transparent 28%), radial-gradient(circle at 50% 50%, ${p.accent} 0%, ${p.accent}88)`,
+                  }}
+                />
+                <div className="flex-1 text-left">
+                  <span className="text-[13px] font-medium" style={{ color: '#d4d4cc' }}>{p.name}</span>
+                  {p.role && (
+                    <span className="hx-mono text-[10.5px] ml-2" style={{ color: '#3a3a36' }}>
+                      · {p.role}
                     </span>
-                  </div>
-                );
-              })}
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ background: p.status === 'connected' ? '#7FE38E' : '#3a3a36', boxShadow: p.status === 'connected' ? '0 0 6px #7FE38E' : 'none' }}
+                  />
+                  <span className="hx-mono text-[10.5px]" style={{ color: '#4a4a42' }}>
+                    {p.connection.modelId || p.connection.provider}
+                  </span>
+                </div>
+              </button>
+            ))}
           </div>
-        )}
-      </div>
-
-      {/* ── Not yet wired notice ─────────────────────────────────────────────── */}
-      <div
-        className="rounded-xl px-5 py-4 hx-mono text-[10px] uppercase tracking-wider"
-        style={{
-          background: 'rgba(201,167,108,.06)',
-          border: '1px solid rgba(201,167,108,.18)',
-          color: '#8c7449',
-        }}
-      >
-        Live telemetry · provider streaming not yet wired — sessions shown from localStorage only
-      </div>
+        </>
+      )}
     </div>
   );
-}
-
-function StatusPill({ status }: { status: string }) {
-  const map: Record<string, { label: string; color: string }> = {
-    connected: { label: 'Connected', color: '#7FE38E' },
-    working:   { label: 'Working',   color: '#7FE38E' },
-    idle:      { label: 'Idle',      color: '#9a9a92' },
-    sleeping:  { label: 'Sleeping',  color: '#5a5a52' },
-    error:     { label: 'Error',     color: '#FF6B6B' },
-    unknown:   { label: 'Unknown',   color: '#5a5a52' },
-  };
-  const { label, color } = map[status] ?? map.unknown;
-  return (
-    <span
-      className="hx-mono text-[8.5px] uppercase tracking-wider px-1.5 py-0.5 rounded"
-      style={{
-        background: `${color}22`,
-        border: `1px solid ${color}55`,
-        color,
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 gap-4">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#5a5a52" strokeWidth={1.2}>
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-      </svg>
-      <p className="hx-serif italic text-neutral-500 text-lg">
-        No sessions yet
-      </p>
-      <p className="hx-mono text-[10px] uppercase tracking-wider text-neutral-600">
-        Select a profile to begin
-      </p>
-    </div>
-  );
-}
-
-function relativeTime(ts: number): string {
-  const diff = Date.now() - ts;
-  if (diff < 60_000) return 'just now';
-  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
-  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
-  return `${Math.floor(diff / 86_400_000)}d ago`;
 }
