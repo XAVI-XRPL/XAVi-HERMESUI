@@ -139,8 +139,8 @@ export default function Sidebar({ time, onForgeProfile }: SidebarProps) {
                   />
                 )}
                 <div
-                  className="w-7 h-7 hx-orb shrink-0 hx-glow-on-hover"
-                  style={{ '--accent': p.accent, '--accent-rgb': p.accentRGB } as React.CSSProperties}
+                  className="hx-orb shrink-0 hx-glow-on-hover"
+                  style={{ width: '28px', height: '28px', '--accent': p.accent, '--accent-rgb': p.accentRGB } as React.CSSProperties}
                 />
                 <div className="flex-1 text-left min-w-0">
                   <div className="flex items-center justify-between gap-2">
