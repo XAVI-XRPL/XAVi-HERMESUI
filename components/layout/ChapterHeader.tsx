@@ -2,9 +2,7 @@
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ChapterHeader — Literary section header with Roman numeral + kicker pattern
-// Ported verbatim from hermes-studio.html prototype
-// Usage: <ChapterHeader numeral="IX" kicker="SELF · STUDIO" title="Studio"
-//       italic="the workshop" subtitle="…" day={day} time={time} />
+// Matches the premium mockup design with serif typography
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface ChapterHeaderProps {
@@ -29,7 +27,7 @@ export default function ChapterHeader({
   accent = '#c9a76c',
 }: ChapterHeaderProps) {
   return (
-    <div className="px-10 pt-10 pb-6 relative hx-fade-up">
+    <div className="px-10 pt-10 pb-2 relative hx-fade-up">
       {/* Numeral + rule + kicker row */}
       <div className="flex items-center gap-3 mb-4">
         <span className="hx-serif italic text-[18px]" style={{ color: accent }}>
@@ -39,29 +37,31 @@ export default function ChapterHeader({
           className="w-8 h-px"
           style={{ background: 'rgba(255,255,255,.18)' }}
         />
-        <span className="hx-mono text-[10px] uppercase tracking-[0.22em] text-neutral-500">
+        <span className="hx-mono text-[10px] uppercase tracking-[0.22em]" style={{ color: '#5a5a52' }}>
           {kicker}
         </span>
       </div>
 
       {/* Title + italic accent */}
-      <h1 className="hx-serif text-[58px] leading-[1.02] tracking-tight text-neutral-100">
+      <h1 className="hx-serif text-[58px] leading-[1.02] tracking-tight" style={{ color: '#e8e8e3' }}>
         {title}
         {italic && (
-          <span className="italic hx-amber-dim ml-3">{italic}</span>
+          <span className="italic ml-3" style={{ color: '#c9a76c', fontStyle: 'italic' }}>
+            {italic}
+          </span>
         )}
       </h1>
 
       {/* Subtitle */}
       {subtitle && (
-        <p className="hx-serif italic text-[19px] text-neutral-400 mt-3 max-w-2xl leading-snug">
+        <p className="hx-serif italic text-[19px] mt-3 max-w-2xl leading-snug" style={{ color: '#7a7a72' }}>
           {subtitle}
         </p>
       )}
 
       {/* EST timestamp */}
-      <div className="hx-mono text-[10px] uppercase tracking-[0.22em] hx-amber-dim mt-5">
-        {time} · {day} · NEW YORK
+      <div className="hx-mono text-[10px] uppercase tracking-[0.22em] mt-5" style={{ color: '#c9a76c' }}>
+        {time} • {day.toUpperCase()} • NEW YORK
       </div>
     </div>
   );
