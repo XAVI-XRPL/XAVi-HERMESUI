@@ -46,15 +46,15 @@ function ProfileTabPills({ profile, activeTab, onTabChange, onEditProfile }: {
 }) {
   return (
     <div className="px-10 mb-8">
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center flex-wrap" style={{ gap: '8px' }}>
         {PROFILE_TABS.map((t) => {
           const active = t.id === activeTab;
           return (
             <button
               key={t.id}
               onClick={() => onTabChange(t.id as ProfileTabId)}
-              className={`hx-pill px-4 py-2 rounded-full flex items-center gap-2.5 text-[13px] ${active ? 'hx-pill-active' : 'text-neutral-400'}`}
-              style={active ? { '--accent': profile.accent, '--accent-rgb': profile.accentRGB } as React.CSSProperties : {}}
+              className={`hx-pill px-4 py-2 rounded-full flex items-center text-[13px] ${active ? 'hx-pill-active' : 'text-neutral-400'}`}
+              style={{ ...{ gap: '10px' }, ...(active ? { '--accent': profile.accent, '--accent-rgb': profile.accentRGB } : {}) } as React.CSSProperties}
             >
               <span className="hx-mono text-[10px] opacity-70">{t.numeral}</span>
               <span>{t.label}</span>
@@ -64,7 +64,8 @@ function ProfileTabPills({ profile, activeTab, onTabChange, onEditProfile }: {
         <div className="flex-1" />
         <button
           onClick={onEditProfile}
-          className="hx-pill px-3 py-2 rounded-full text-[11px] text-neutral-400 flex items-center gap-1.5"
+          className="hx-pill px-3 py-2 rounded-full text-[11px] text-neutral-400 flex items-center"
+          style={{ gap: '6px' }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
